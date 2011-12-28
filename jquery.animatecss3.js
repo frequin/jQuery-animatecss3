@@ -89,6 +89,8 @@
 		$.each(css3properties, function (property, value) {
 			properties.push(property);
 		});
+		// add how many css properties are in the css3properties map
+		$.extend(o, {propsLength: properties.length});
 			
 		return this.each(function () {
 			var el = this,
@@ -127,7 +129,9 @@
 		delay: 0, // delay in milliseconds
 		complete: null, // a callback executed at the end of the animation
 		queue: true, // queue the animation in the fx queue or immediately execute it
-		test: "allProps" // "allProps" or "allPropsAndValues" or custom boolean returning function
+		test: "allProps", // "allProps" or "allPropsAndValues" or custom boolean returning function
+		propsLength: 0, // number of css properties passed in css3properties
+		transitionendNb: 0
 	};
 	
 	// handling of the end of an animation
@@ -135,18 +139,22 @@
 		var $this = $(this),
 			options = event.data.options;
 		
-		console.log("dequeued");
+		console.log("transitionend");
+		options.transitionendNb += 1;
 		
-		// get rid of the animation end binding
-		$this.unbind(animatecss3.transitionendEventName, animatecss3.transitionendHandler);
-		
-		// execute the complete callback if passed
-		if (typeof options.complete === "function") {
-			options.complete.apply(this);
+		if (options.transitionendNb === options.propsLength) { // end of the animation
+			// get rid of the animation end binding
+			$this.unbind(animatecss3.transitionendEventName, animatecss3.transitionendHandler);
+			
+			// execute the complete callback if passed
+			if (typeof options.complete === "function") {
+				options.complete.apply(this);
+			}
+			
+			// next !
+			console.log("dequeued");
+			$this.dequeue();
 		}
-		
-		// next !
-		$this.dequeue();
 	};
 	
 	/*

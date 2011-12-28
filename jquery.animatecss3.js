@@ -158,7 +158,7 @@
 			'WebkitTransition': 'webkitTransitionEnd',
 			'MozTransition': 'transitionend',
 			'OTransition': 'oTransitionEnd',
-			'msTransition': 'msTransitionEnd',
+			'msTransition': 'MSTransitionEnd',
 			'KhtmlTransition': 'khtmlTransitionEnd',
 			'transition': 'transitionend'
 		},

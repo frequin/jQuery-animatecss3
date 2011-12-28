@@ -101,7 +101,7 @@
 					$el.bind(transitionendEventName, {options: o}, animatecss3.transitionendHandler);
 					
 					// set the transitions to the element
-					tools.setTransitions.apply(el, [properties, o.duration, o.easing]);
+					tools.setTransitions.apply(el, [properties, o.duration, o.easing, o.delay]);
 					// then set the properties and their values
 					$.each(properties, function (index, property) {
 						tools.setProperty.apply(el, [property, css3properties[property]]);
@@ -124,6 +124,7 @@
 	animatecss3.defaultOptions = {
 		duration: 400, // in milliseconds
 		easing: "ease", // transition timing function
+		delay: 0, // delay in milliseconds
 		complete: null, // a callback executed at the end of the animation
 		queue: true, // queue the animation in the fx queue or immediately execute it
 		test: "allProps" // "allProps" or "allPropsAndValues" or custom boolean returning function
@@ -148,6 +149,9 @@
 		$this.dequeue();
 	};
 	
+	/*
+	 * animatecss3 tools namespace
+	 */
 	animatecss3.tools = {
 		vendorPrefixes: 'Webkit Moz O ms Khtml'.split(' '),
 		transitionendEventNames: {
@@ -158,6 +162,12 @@
 			'KhtmlTransition': 'khtmlTransitionEnd',
 			'transition': 'transitionend'
 		},
+		/*
+		 * Ttest if the browser support a property
+		 * return the (possibly vendor prefixed) property name if supported
+		 * else return false.
+		 * Take a property name string as argument
+		 */
         hasProp: (function () {
             var contextStyle = document.createElement("div").style,
                 cachedProps = {};
@@ -182,10 +192,14 @@
                     }
                 }
 				
-                cachedProps[prop] = hasProp;
-                return hasProp;
+                return cachedProps[prop] = hasProp;
             };
         }()),
+		
+		/*
+		 * Test if the browser suuport a css property associated with a value
+		 * return true if supported, false otherwise
+		 */
         hasPropAndValue: (function () {
             var contextStyle = document.createElement("div").style,
                 propsAndValues = {};
@@ -210,24 +224,41 @@
                     }
                 }
 				
-                propsAndValues[prop][value] = hasPropAndValue;
-                return hasPropAndValue;
+                return propsAndValues[prop][value] = hasPropAndValue;
             };
         }()),
-		setTransitions: function (properties, duration, easing) {
+		
+		/*
+		 * Apply transitions to an element
+		 * Take a properties array, a duration number (in ms) and an easing string
+		 */
+		setTransitions: function (properties, duration, easing, delay) {
 			var durationSec = (duration / 1000) + "s",
+				delaySec = (delay / 1000) + "s",
 				currentTransitions = this.style[animatecss3.transitionProp],
 				newTransitions = currentTransitions === "" ? [] : [currentTransitions];
 			
 			$.each(properties, function (index, property) {
-				newTransitions.push([property, durationSec, easing].join(" "));
+				newTransitions.push([property, durationSec, easing, delaySec].join(" "));
 			});
 			
 			this.style[animatecss3.transitionProp] = newTransitions.join(", ");
 		},
+		
+		// Apply a property and a value to an element
 		setProperty: function (property, value) {
 			this.style[animatecss3.tools.hasProp(property)] = value;
 		},
+		
+		/*
+		 * Determine wheter an animation function using css3 transitions
+		 * can be used.
+		 * If what equals "allProps", all passed properties (array or object map)
+		 * are tested.
+		 * If what equals "allPropsAndValues", all passed css properties and values
+		 * in the properties object map are tested.
+		 * Return true if the test pass, false otherwise.
+		 */
 		test: function (what, properties, options) {
 			var pass = true;
 			

@@ -106,7 +106,7 @@
 					tools.setTransitions.apply(el, [properties, o.duration, o.easing, o.delay]);
 					// then set the properties and their values
 					$.each(properties, function (index, property) {
-						if (tools.hasProp(property) === false || el.style[tools.hasProp(property)] === css3properties[property]) {
+						if (tools.hasProp(property) === false || el.style[tools.hasProp(property)] === css3properties[property]) { // property not supported or already set with same value
 							// no need to set the property
 							o.transitionsLeft -= 1;
 						} else {
@@ -241,20 +241,56 @@
         }()),
 		
 		/*
+		 * Get the transitions of an element and return a map with one unique value
+		 * for each property. The property is the key and the transition string of
+		 * this property is the value.
+		 */
+		getTransitionsMap: function (el) {
+			var elTransitionsStr = el.style[animatecss3.transitionProp],
+				elTransitions = elTransitionsStr === "" ? [] : elTransitionsStr.split(", "),
+				elTransitionsMap = {};
+			
+			$.each(elTransitions, function (index, str) {
+				elTransitionsMap[str.split(" ")[0]] = str;
+			});
+			
+			return elTransitionsMap;
+		},
+		
+		/*
+		 * Return the values of an object as an array
+		 */
+		getObjectValuesArray: function (obj) {
+			var arr = [];
+			
+			$.each(obj, function (key, val) {
+				arr.push(val);
+			});
+			
+			return arr;
+		},
+		
+		/*
 		 * Apply transitions to an element
 		 * Take a properties array, a duration number (in ms) and an easing string
 		 */
 		setTransitions: function (properties, duration, easing, delay) {
 			var durationSec = (duration / 1000) + "s",
 				delaySec = (delay / 1000) + "s",
-				currentTransitions = this.style[animatecss3.transitionProp],
-				newTransitions = currentTransitions === "" ? [] : [currentTransitions];
+				transitionsMap = animatecss3.tools.getTransitionsMap(this),
+				newTransitions;
 			
 			$.each(properties, function (index, property) {
-				newTransitions.push([property, durationSec, easing, delaySec].join(" "));
+				// the transition property is overriden or created
+				transitionsMap[property] = [property, durationSec, easing, delaySec].join(" ");
 			});
 			
-			this.style[animatecss3.transitionProp] = newTransitions.join(", ");
+			newTransitions = animatecss3.tools.getObjectValuesArray(transitionsMap);
+			
+			if (newTransitions.length > 0) {
+				// apply the new transition set
+				this.style[animatecss3.transitionProp] = newTransitions.join(", ");
+			}
 		},
 		
 		/*

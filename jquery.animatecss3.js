@@ -90,8 +90,8 @@
 			properties.push(property);
 		});
 		// add how many css properties are in the css3properties map
-		$.extend(o, {propsLength: properties.length});
-			
+		$.extend(o, {transitionsLeft: properties.length});
+		
 		return this.each(function () {
 			var el = this,
 				$el = $(el),
@@ -106,11 +106,16 @@
 					tools.setTransitions.apply(el, [properties, o.duration, o.easing, o.delay]);
 					// then set the properties and their values
 					$.each(properties, function (index, property) {
-						tools.setProperty.apply(el, [property, css3properties[property]]);
+						if (tools.hasProp(property) === false || el.style[tools.hasProp(property)] === css3properties[property]) {
+							// no need to set the property
+							o.transitionsLeft -= 1;
+						} else {
+							el.style[tools.hasProp(property)] = css3properties[property];
+						}
 					});
 					
 					// force transitionend event to trigger if duration equals 0ms
-					if (o.duration === 0) {
+					if (o.duration === 0 || o.transitionsLeft <= 0) {
 						$el.trigger(transitionendEventName);
 					};
 				};
@@ -130,8 +135,7 @@
 		complete: null, // a callback executed at the end of the animation
 		queue: true, // queue the animation in the fx queue or immediately execute it
 		test: "allProps", // "allProps" or "allPropsAndValues" or custom boolean returning function
-		propsLength: 0, // number of css properties passed in css3properties
-		transitionendNb: 0
+		transitionsLeft: 0 // number of non ended transitions
 	};
 	
 	// handling of the end of an animation
@@ -140,9 +144,9 @@
 			options = event.data.options;
 		
 		console.log("transitionend");
-		options.transitionendNb += 1;
+		options.transitionsLeft -= 1;
 		
-		if (options.transitionendNb === options.propsLength) { // end of the animation
+		if (options.transitionsLeft <= 0) { // end of the animation
 			// get rid of the animation end binding
 			$this.unbind(animatecss3.transitionendEventName, animatecss3.transitionendHandler);
 			
@@ -251,11 +255,6 @@
 			});
 			
 			this.style[animatecss3.transitionProp] = newTransitions.join(", ");
-		},
-		
-		// Apply a property and a value to an element
-		setProperty: function (property, value) {
-			this.style[animatecss3.tools.hasProp(property)] = value;
 		},
 		
 		/*

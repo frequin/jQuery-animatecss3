@@ -208,7 +208,33 @@
             };
         }()),
 		
+		
+		
 		/*
+		 * Return a lowercase style property from a camelCase property
+		 * (e.g. toLowercaseProp('WebkitBorderRadius') returns -webkit-border-radius)
+		 */
+		toLowercaseProp: function (camelCaseProp) {
+			var splittedProp = camelCaseProp.split(''),
+				lowercase = [];
+			
+			$.each(splittedProp, function (index, letter) {
+				if (letter !== '-' && letter.toUpperCase() === letter) {
+					lowercase.push('-' + letter.toLowerCase());
+				}
+				else {
+					lowercase.push(letter);
+				}
+			});
+			
+			if (lowercase[0] === 'm' && lowercase[1] === 's') {
+				lowercase = ('-' + lowercase.join('')).split('');
+			}
+			
+			return lowercase.join('');
+		},
+		
+		 /*
 		 * Test if the browser suuport a css property associated with a value
 		 * return true if supported, false otherwise
 		 */
@@ -281,8 +307,13 @@
 				newTransitions;
 			
 			$.each(properties, function (index, property) {
-				// the transition property is overriden or created
-				transitionsMap[property] = [property, durationSec, easing, delaySec].join(" ");
+				var validProp = animatecss3.tools.hasProp(property),
+					lowercaseProp = validProp !== false ? animatecss3.tools.toLowercaseProp(validProp) : false;
+				
+				if (validProp) {
+					// the transition property is overriden or created
+					transitionsMap[lowercaseProp] = [lowercaseProp, durationSec, easing, delaySec].join(" ");
+				}
 			});
 			
 			newTransitions = animatecss3.tools.getObjectValuesArray(transitionsMap);

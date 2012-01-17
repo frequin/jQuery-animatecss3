@@ -84,7 +84,6 @@
 		}
 		
 		// win ! :)
-		
 		// copy the keys of css3properties into properties
 		$.each(css3properties, function (property, value) {
 			properties.push(property);
@@ -97,10 +96,12 @@
 				$el = $(el),
 				// the animation function
 				animation = function () {
-					console.log("executed");
+					o.handler = function (event) {
+						animatecss3.transitionendHandler.apply(this, [event]);
+					};
 					
 					// binding transitionend event for handling the end of the animation
-					$el.bind(transitionendEventName, {options: o}, animatecss3.transitionendHandler);
+					$el.bind(transitionendEventName, {options: o}, o.handler);
 					
 					// set the transitions to the element
 					tools.setTransitions.apply(el, [properties, o.duration, o.easing, o.delay]);
@@ -122,7 +123,7 @@
 			
 			if (o.queue) { // store the animation in the fx queue
 				$el.queue(animation);
-			} else { // the animation is immediatly executed
+			} else { // the animation is immediately executed
 				animation();
 			}
 		});
@@ -143,12 +144,11 @@
 		var $this = $(this),
 			options = event.data.options;
 		
-		console.log("transitionend");
 		options.transitionsLeft -= 1;
 		
 		if (options.transitionsLeft <= 0) { // end of the animation
 			// get rid of the animation end binding
-			$this.unbind(animatecss3.transitionendEventName, animatecss3.transitionendHandler);
+			$this.unbind(animatecss3.transitionendEventName, options.handler);
 			
 			// execute the complete callback if passed
 			if (typeof options.complete === "function") {
@@ -156,8 +156,9 @@
 			}
 			
 			// next !
-			console.log("dequeued");
-			$this.dequeue();
+			if (options.queue) {
+				$this.dequeue();
+			}
 		}
 	};
 	

@@ -57,11 +57,13 @@
 (function ($) {
 	var animatecss3 = $.fn.animatecss3 = function (css3properties, options, failProperties, failOptions) {
 		var tools = animatecss3.tools,
-			o = $.extend({}, animatecss3.defaultOptions, options),
+			o = $.extend({
+					properties: [], // keys of css3properties
+					transitionsLeft: [] // non ended transitions
+				}, animatecss3.defaultOptions, options),
 			transitionProp = tools.hasProp('transition'), // (vendor prefixed or not) name of the transition property or false
 			transitionendEventName = transitionProp ? tools.transitionendEventNames[transitionProp] : "",
-			pass = transitionProp, // browser has to support transitions
-			properties = [];
+			pass = transitionProp; // browser has to support transitions
 		
 		animatecss3.transitionProp = transitionProp; // store the value
 		animatecss3.transitionendEventName = transitionendEventName; // store the value
@@ -84,12 +86,10 @@
 		}
 		
 		// win ! :)
-		// copy the keys of css3properties into properties
+		// copy the keys of css3properties into o.properties
 		$.each(css3properties, function (property, value) {
-			properties.push(property);
+			o.properties.push(property);
 		});
-		// add how many css properties are in the css3properties map
-		$.extend(o, {transitionsLeft: properties.length});
 		
 		return this.each(function () {
 			var el = this,
@@ -104,19 +104,22 @@
 					$el.bind(transitionendEventName, {options: o}, o.handler);
 					
 					// set the transitions to the element
-					tools.setTransitions.apply(el, [properties, o.duration, o.easing, o.delay]);
+					tools.setTransitions.apply(el, [o.properties, o.duration, o.easing, o.delay]);
+					
 					// then set the properties and their values
-					$.each(properties, function (index, property) {
-						if (tools.hasProp(property) === false || el.style[tools.hasProp(property)] === css3properties[property]) { // property not supported or already set with same value
+					$.each(css3properties, function (property, propValue) {
+						var validProp = tools.hasProp(property);
+						
+						if (validProp === false || el.style[validProp] === propValue) { // property not supported or already set with same value
 							// no need to set the property
-							o.transitionsLeft -= 1;
 						} else {
-							el.style[tools.hasProp(property)] = css3properties[property];
+							o.transitionsLeft.push(tools.toLowercaseProp(validProp));
+							el.style[tools.hasProp(property)] = propValue;
 						}
 					});
 					
 					// force transitionend event to trigger if duration equals 0ms
-					if (o.duration === 0 || o.transitionsLeft <= 0) {
+					if (o.duration === 0 || o.transitionsLeft.length === 0) {
 						$el.trigger(transitionendEventName);
 					};
 				};
@@ -135,18 +138,22 @@
 		delay: 0, // delay in milliseconds
 		complete: null, // a callback executed at the end of the animation
 		queue: true, // queue the animation in the fx queue or immediately execute it
-		test: "allProps", // "allProps" or "allPropsAndValues" or custom boolean returning function
-		transitionsLeft: 0 // number of non ended transitions
+		test: "allProps" // "allProps" or "allPropsAndValues" or custom boolean returning function
 	};
 	
 	// handling of the end of an animation
 	animatecss3.transitionendHandler = function (event) {
 		var $this = $(this),
-			options = event.data.options;
+			options = event.data.options,
+			originalEvent = event.originalEvent || null,
+			propertyName = originalEvent !== null ? event.originalEvent.propertyName : '',
+			inArrayIndex = $.inArray(propertyName, options.transitionsLeft);
 		
-		options.transitionsLeft -= 1;
+		if (inArrayIndex !== -1) {
+			options.transitionsLeft.splice(inArrayIndex, 1);
+		}
 		
-		if (options.transitionsLeft <= 0) { // end of the animation
+		if (options.transitionsLeft.length === 0) { // end of the animation
 			// get rid of the animation end binding
 			$this.unbind(animatecss3.transitionendEventName, options.handler);
 			

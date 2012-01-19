@@ -58,7 +58,6 @@
 	var animatecss3 = $.fn.animatecss3 = function (css3properties, options, failProperties, failOptions) {
 		var tools = animatecss3.tools,
 			o = $.extend({
-					properties: [], // keys of css3properties
 					transitionsLeft: [] // non ended transitions
 				}, animatecss3.defaultOptions, options),
 			transitionProp = tools.hasProp('transition'), // (vendor prefixed or not) name of the transition property or false
@@ -86,11 +85,6 @@
 		}
 		
 		// win ! :)
-		// copy the keys of css3properties into o.properties
-		$.each(css3properties, function (property, value) {
-			o.properties.push(property);
-		});
-		
 		return this.each(function () {
 			var el = this,
 				$el = $(el),
@@ -104,7 +98,7 @@
 					$el.bind(transitionendEventName, {options: o}, o.handler);
 					
 					// set the transitions to the element
-					tools.setTransitions.apply(el, [o.properties, o.duration, o.easing, o.delay]);
+					tools.setTransitions.apply(el, [tools.getObjectKeysArray(css3properties), o.duration, o.easing, o.delay]);
 					
 					// then set the properties and their values
 					$.each(css3properties, function (property, propValue) {
@@ -299,6 +293,19 @@
 			
 			$.each(obj, function (key, val) {
 				arr.push(val);
+			});
+			
+			return arr;
+		},
+		
+		/*
+		 * Return the keys of an object as an array
+		 */
+		getObjectKeysArray: function (obj) {
+			var arr = [];
+			
+			$.each(obj, function (key, val) {
+				arr.push(key);
 			});
 			
 			return arr;

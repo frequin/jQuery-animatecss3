@@ -90,8 +90,8 @@
 				$el = $(el),
 				// the animation function
 				animation = function () {
-					o.handler = function (event) {
-						animatecss3.transitionendHandler.apply(this, [event]);
+					o.handler = function (event, force) {
+						animatecss3.transitionendHandler.apply(this, [event, force]);
 					};
 					
 					// binding transitionend event for handling the end of the animation
@@ -114,7 +114,7 @@
 					
 					// force transitionend event to trigger if duration equals 0ms
 					if (o.duration === 0 || o.transitionsLeft.length === 0) {
-						$el.trigger(transitionendEventName);
+						$el.trigger(transitionendEventName, [true]);
 					};
 				};
 			
@@ -136,7 +136,7 @@
 	};
 	
 	// handling of the end of an animation
-	animatecss3.transitionendHandler = function (event) {
+	animatecss3.transitionendHandler = function (event, forceEnd) {
 		var $this = $(this),
 			options = event.data.options,
 			originalEvent = event.originalEvent || null,
@@ -147,7 +147,7 @@
 			options.transitionsLeft.splice(inArrayIndex, 1);
 		}
 		
-		if (options.transitionsLeft.length === 0) { // end of the animation
+		if (options.transitionsLeft.length === 0 || forceEnd === true) { // end of the animation
 			// get rid of the animation end binding
 			$this.unbind(animatecss3.transitionendEventName, options.handler);
 			

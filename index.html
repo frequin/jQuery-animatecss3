@@ -42,6 +42,7 @@
 				height: "40px"
 			},
 			{
+				duration: 0,
 				complete: function () {
 					console.log("2nd animation completed");
 				}
@@ -65,7 +66,7 @@
 			{
 				duration: 2000,
 				complete: function () {
-					console.log("3rd animation completed");
+					console.log("3rd animation completed (fallback)");
 				}
 			})
 			.animatecss3({

@@ -184,7 +184,8 @@
             return function (prop) {
                 var hasProp = false,
                     upper = prop.charAt(0).toUpperCase() + prop.slice(1),
-					prefixes = animatecss3.tools.vendorPrefixes;
+					prefixes = animatecss3.tools.vendorPrefixes,
+					i, max;
 					
                 if (typeof cachedProps[prop] !== "undefined") {
                     return cachedProps[prop];
@@ -193,7 +194,7 @@
                 if (typeof contextStyle[prop] === "string") {
                     hasProp = prop;
                 } else {
-                    for (var i = 0, max = prefixes.length; i < max; i += 1) {
+                    for (i = 0, max = prefixes.length; i < max; i += 1) {
                         if (typeof contextStyle[prefixes[i] + upper] === "string") {
                             hasProp = prefixes[i] + upper;
                             break;

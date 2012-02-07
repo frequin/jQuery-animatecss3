@@ -60,12 +60,7 @@
 			o = $.extend({
 					transitionsLeft: [] // non ended transitions
 				}, animatecss3.defaultOptions, options),
-			transitionProp = tools.hasProp('transition'), // (vendor prefixed or not) name of the transition property or false
-			transitionendEventName = transitionProp ? tools.transitionendEventNames[transitionProp] : "",
-			pass = transitionProp; // browser has to support transitions
-		
-		animatecss3.transitionProp = transitionProp; // store the value
-		animatecss3.transitionendEventName = transitionendEventName; // store the value
+			pass = animatecss3.properties.transition; // browser has to support transitions
 		
 		if (pass) { // browser do support transitions
 			if (typeof o.test === "string") { // "allProps" or "allPropsAndValues"
@@ -95,7 +90,7 @@
 					};
 					
 					// binding transitionend event for handling the end of the animation
-					$el.bind(transitionendEventName, {options: o}, o.handler);
+					$el.bind(animatecss3.transitionendEventName, {options: o}, o.handler);
 					
 					// set the transitions to the element
 					tools.setTransitions.apply(el, [tools.getObjectKeysArray(css3properties), o.duration, o.easing, o.delay]);
@@ -114,7 +109,7 @@
 					
 					// force transitionend event to trigger if duration equals 0ms
 					if (o.duration === 0 || o.transitionsLeft.length === 0) {
-						$el.trigger(transitionendEventName);
+						$el.trigger(animatecss3.transitionendEventName);
 					};
 				};
 			
@@ -274,7 +269,7 @@
 		 * this property is the value.
 		 */
 		getTransitionsMap: function (el) {
-			var elTransitionsStr = el.style[animatecss3.transitionProp],
+			var elTransitionsStr = el.style[animatecss3.properties.transition],
 				elTransitions = elTransitionsStr === "" ? [] : elTransitionsStr.split(", "),
 				elTransitionsMap = {};
 			
@@ -335,7 +330,7 @@
 			
 			if (newTransitions.length > 0) {
 				// apply the new transition set
-				this.style[animatecss3.transitionProp] = newTransitions.join(", ");
+				this.style[animatecss3.properties.transition] = newTransitions.join(", ");
 			}
 		},
 		
@@ -368,4 +363,14 @@
 			return pass;
 		}
     };
+	
+	// set once some properties
+	animatecss3.properties = {};
+	animatecss3.properties.transition = animatecss3.tools.hasProp('transition');
+	animatecss3.properties.transitionProperty = animatecss3.tools.hasProp('transitionProperty');
+	animatecss3.properties.transitionDuration = animatecss3.tools.hasProp('transitionDuration');
+	animatecss3.properties.transitionTimingFunction = animatecss3.tools.hasProp('transitionTimingFunction');
+	animatecss3.properties.transitionDelay = animatecss3.tools.hasProp('transitionDelay');
+	
+	animatecss3.transitionendEventName = animatecss3.properties.transition ? animatecss3.tools.transitionendEventNames[animatecss3.properties.transition] : "";
 }(jQuery));

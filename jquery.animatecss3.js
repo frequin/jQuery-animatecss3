@@ -225,7 +225,7 @@
 				}
 			});
 			
-			if (lowercase[0] === 'm' && lowercase[1] === 's') {
+			if (lowercase[0] === 'm' && lowercase[1] === 's') { //ms prefix exception eg: msTransform => -ms-transform
 				lowercase = ('-' + lowercase.join('')).split('');
 			}
 			
@@ -271,10 +271,13 @@
 		 */
 		getTransitionsMap: function (el) {
 			var elTransitionsStr = el.style[animatecss3.properties.transition],
-				elTransitions = elTransitionsStr === "" ? [] : elTransitionsStr.split(", "),
+				elTransitions = elTransitionsStr === "" ? [] : elTransitionsStr.split("s, "),
 				elTransitionsMap = {};
 			
 			$.each(elTransitions, function (index, str) {
+				if (index < elTransitions.length - 1) { // if not last item, add the "s" of delay's seconds
+					str += 's';
+				}
 				elTransitionsMap[str.split(" ")[0]] = str;
 			});
 			

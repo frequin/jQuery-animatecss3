@@ -1,4 +1,4 @@
-h1. jQuery animatecss3 plugin
+<h1>jQuery animatecss3 plugin</h1>
 
 The jQuery animatecss3 plugin, like the jQuery animate method, performs a
 custom animation of a set of css properties and extra parameters.
@@ -6,7 +6,7 @@ In addition to that, in case these properties wouldn't be supported, it is
 possible to define a fallback set of css properties and parameters to pass
 to the classical jQuery animate method.
 
-h2. use
+<h2>use</h2>
 
 animatecss3 takes up to 4 parameters (the last three parameters are optionals) :
 - css3properties: this first map of css properties which have to be animatable

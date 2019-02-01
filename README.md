@@ -1,8 +1,5 @@
-DEPRECATED
-==========
-
-Outdated repo
--------------
+DEPRECATED (outdated repo)
+--------------------------
 
 jQuery animatecss3 plugin
 =========================
